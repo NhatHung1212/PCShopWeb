@@ -73,24 +73,31 @@ var app = builder.Build();
 // ===========================
 // AUTO MIGRATE DATABASE ON STARTUP
 // ===========================
-using (var scope = app.Services.CreateScope())
+try
 {
-    var services = scope.ServiceProvider;
-    try
+    using (var scope = app.Services.CreateScope())
     {
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        
+        logger.LogInformation("Starting database migration...");
         var context = services.GetRequiredService<ApplicationDbContext>();
         await context.Database.MigrateAsync();
+        logger.LogInformation("Database migration completed successfully.");
         
         // Seed data if needed
+        logger.LogInformation("Starting data seeding...");
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await DbSeeder.SeedAsync(context, userManager, roleManager);
+        logger.LogInformation("Data seeding completed successfully.");
     }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-    }
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "CRITICAL ERROR during database setup. Application may not function correctly.");
+    // Don't throw - let app start so we can see error details
 }
 
 // ===========================
@@ -100,7 +107,7 @@ app.Urls.Clear();
 app.Urls.Add($"http://0.0.0.0:{port}");
 
 // ===========================
-// 5. Không dùng HTTPS redirect trên Render
+// 5. Error handling - Always use production mode on Render
 // ===========================
 if (app.Environment.IsDevelopment())
 {
@@ -109,6 +116,20 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
+    // Log all unhandled exceptions
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (Exception ex)
+        {
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Unhandled exception for request {Path}", context.Request.Path);
+            throw;
+        }
+    });
 }
 
 // ===========================
