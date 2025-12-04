@@ -1,33 +1,30 @@
-## Multi-stage Dockerfile for ASP.NET Core (net10.0)
+## Multi-stage Dockerfile for ASP.NET Core
 ## Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution and project files
-COPY ShopWeb.sln ./
-COPY ShopWeb.csproj ./
+# Copy project files
+COPY *.csproj ./
+COPY *.sln ./
 
 # Restore dependencies
-RUN dotnet restore ShopWeb.csproj
+RUN dotnet restore
 
 # Copy the rest of the source
 COPY . ./
 
 # Publish to /app/out
-RUN dotnet publish ShopWeb.csproj -c Release -o /app/out
+RUN dotnet publish -c Release -o /app/out --no-restore
 
 ## Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
 # Copy published output
 COPY --from=build /app/out ./
 
-# Environment and port configuration
-ENV ASPNETCORE_ENVIRONMENT=Production
-# Render provides PORT env var; default to 10000 if not set
-ENV PORT=10000
-ENV ASPNETCORE_URLS="http://0.0.0.0:${PORT}"
+# Render provides PORT env var
+ENV ASPNETCORE_URLS=http://+:${PORT:-10000}
 
 EXPOSE 10000
 
