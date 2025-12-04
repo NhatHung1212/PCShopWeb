@@ -71,44 +71,42 @@ builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 // ===========================
-// AUTO MIGRATE DATABASE ON STARTUP
+// AUTO SEED DATA ON STARTUP (No migrations - tables already exist from Laravel)
 // ===========================
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
     
-    logger.LogInformation("=== DATABASE SETUP START ===");
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    
-    // Check pending migrations
-    var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-    logger.LogInformation($"Pending migrations: {pendingMigrations.Count}");
-    
-    if (pendingMigrations.Any())
+    try
     {
-        foreach (var migration in pendingMigrations)
-        {
-            logger.LogInformation($"  - {migration}");
-        }
+        logger.LogInformation("=== DATABASE SETUP START ===");
+        var context = services.GetRequiredService<ApplicationDbContext>();
         
-        logger.LogInformation("Applying migrations...");
-        context.Database.Migrate();
-        logger.LogInformation("✓ Migrations applied successfully!");
+        // Check connection
+        var canConnect = context.Database.CanConnect();
+        logger.LogInformation($"Database connection: {(canConnect ? "OK" : "FAILED")}");
+        
+        // Check pending migrations (log only, don't apply)
+        var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+        var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
+        logger.LogInformation($"Applied migrations: {appliedMigrations.Count}");
+        logger.LogInformation($"Pending migrations: {pendingMigrations.Count}");
+        
+        // Seed Identity data (roles and admin user)
+        logger.LogInformation("Seeding Identity data...");
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
+        logger.LogInformation("✓ Data seeding completed!");
+        
+        logger.LogInformation("=== DATABASE SETUP COMPLETE ===");
     }
-    else
+    catch (Exception ex)
     {
-        logger.LogInformation("✓ Database is up to date.");
+        logger.LogError(ex, "ERROR during database setup");
+        throw;
     }
-    
-    // Seed data
-    logger.LogInformation("Seeding data...");
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
-    logger.LogInformation("✓ Data seeding completed!");
-    
-    logger.LogInformation("=== DATABASE SETUP COMPLETE ===");
 }
 
 // ===========================
