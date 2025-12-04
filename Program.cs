@@ -73,31 +73,30 @@ var app = builder.Build();
 // ===========================
 // AUTO MIGRATE DATABASE ON STARTUP
 // ===========================
-try
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
+    try
     {
-        var services = scope.ServiceProvider;
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        
         logger.LogInformation("Starting database migration...");
         var context = services.GetRequiredService<ApplicationDbContext>();
-        await context.Database.MigrateAsync();
+        context.Database.Migrate(); // Synchronous version
         logger.LogInformation("Database migration completed successfully.");
         
         // Seed data if needed
         logger.LogInformation("Starting data seeding...");
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        await DbSeeder.SeedAsync(context, userManager, roleManager);
+        DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
         logger.LogInformation("Data seeding completed successfully.");
     }
-}
-catch (Exception ex)
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "CRITICAL ERROR during database setup. Application may not function correctly.");
-    // Don't throw - let app start so we can see error details
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "CRITICAL ERROR during database setup. Application may not function correctly.");
+        throw; // Throw to prevent app from starting with broken database
+    }
 }
 
 // ===========================
