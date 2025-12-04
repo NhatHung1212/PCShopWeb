@@ -71,6 +71,29 @@ builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 // ===========================
+// AUTO MIGRATE DATABASE ON STARTUP
+// ===========================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
+        
+        // Seed data if needed
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        await DbSeeder.SeedAsync(context, userManager, roleManager);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+    }
+}
+
+// ===========================
 // 4. BẮT BUỘC: Kestrel lắng nghe PORT Render
 // ===========================
 app.Urls.Clear();
@@ -103,7 +126,17 @@ app.MapGet("/check-db", async (ApplicationDbContext context) =>
     {
         await context.Database.OpenConnectionAsync();
         await context.Database.CloseConnectionAsync();
-        return Results.Text("MySQL Connection OK!");
+        
+        // Check if tables exist
+        var canConnect = await context.Database.CanConnectAsync();
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+        
+        return Results.Text($"MySQL Connection OK!\n" +
+            $"Can Connect: {canConnect}\n" +
+            $"Applied Migrations: {appliedMigrations.Count()}\n" +
+            $"Pending Migrations: {pendingMigrations.Count()}\n" +
+            $"Migrations: {string.Join(", ", appliedMigrations)}");
     }
     catch (Exception ex)
     {
