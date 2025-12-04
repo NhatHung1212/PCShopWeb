@@ -1,0 +1,540 @@
+/* ===== HERO SECTION WITH VIDEO BACKGROUND ===== */
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Video Background */
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.bg-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.85) 0%,
+        rgba(10, 10, 10, 0.75) 50%,
+        rgba(0, 0, 0, 0.85) 100%
+    );
+    backdrop-filter: blur(2px);
+}
+
+/* Hero Content */
+.hero-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width:1700px;
+    margin: 0 auto;
+    padding: 60px 40px;
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: minmax(400px, 1fr) minmax(600px, 1.2fr);
+    gap: 60px;
+    align-items: center;
+}
+
+/* ===== LEFT SIDE: TEXT CONTENT ===== */
+.hero-text {
+    color: #fff;
+    max-width: 600px;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.6s ease;
+}
+
+.hero-title {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.6s ease 0.2s backwards;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.hero-description {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #d1d5db;
+    margin-bottom: 18px;
+    animation: fadeInUp 0.6s ease 0.4s backwards;
+}
+
+.hero-description strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+    animation: fadeInUp 0.6s ease 0.6s backwards;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #a855f7;
+}
+
+.btn-secondary:hover {
+    background: rgba(168, 85, 247, 0.1);
+    transform: translateY(-2px);
+}
+
+/* ===== RIGHT SIDE: VIDEO CAROUSEL ===== */
+.hero-videos {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.video-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.video-slides-wrapper {
+    display: flex;
+    gap: 0;
+    will-change: transform;
+}
+
+.video-slide {
+    min-width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    gap: clamp(12px, 2vw, 24px);
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.carousel-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 28px;
+    width: 100%;
+}
+
+.pagination-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 0;
+}
+
+.pagination-dot:hover {
+    background: #555;
+    transform: scale(1.1);
+}
+
+.pagination-dot.active {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border-color: #a855f7;
+    width: 28px;
+    border-radius: 5px;
+}
+
+.video-box {
+    background: rgba(26, 26, 26, 0.95);
+    border: 1px solid #222;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    backdrop-filter: blur(6px);
+    width: clamp(180px, 28%, 260px);
+    aspect-ratio: 9 / 16;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.video-box:hover {
+    transform: translateY(-5px);
+    border-color: #a855f7;
+    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+.video-wrapper iframe,
+.video-wrapper video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100%;
+    width: auto;
+    min-width: 100%;
+    max-width: none;
+    object-fit: cover;
+}
+
+.video-info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.video-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.video-info p {
+    font-size: 12px;
+    color: #d1d5db;
+    margin: 0;
+}
+
+/* Carousel Pagination */
+/* pagination removed for marquee mode */
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== HERO BRANDS MARQUEE ===== */
+.hero-brands {
+    margin-top: clamp(40px, 6vw, 80px);
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 4vw, 50px);
+    background: transparent;
+    padding: 0;
+}
+
+.hero-brands-title {
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.hero-brands-divider {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0));
+    display: inline-flex;
+}
+
+.brands-row {
+    display: flex;
+    gap: clamp(18px, 3vw, 30px);
+    align-items: center;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 0;
+    margin: 0;
+    scroll-behavior: auto;
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.brands-row::-webkit-scrollbar {
+    display: none;
+}
+
+.brand-item {
+    flex: 0 0 auto;
+    width: clamp(110px, 10vw, 150px);
+    height: clamp(50px, 6vw, 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    opacity: 0.85;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.brand-item:hover {
+    transform: translateY(-4px);
+    opacity: 1;
+}
+
+.brand-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+    transition: transform 0.3s ease;
+}
+
+.brand-item:hover img {
+    transform: scale(1.08);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1400px) {
+    .hero-container {
+        max-width: 1400px;
+        padding: 60px 30px;
+    }
+    
+    .video-box {
+        width: clamp(170px, 28%, 240px);
+    }
+}
+
+@media (max-width: 1200px) {
+    .hero-container {
+        padding: 50px 30px;
+    }
+    
+    .hero-content {
+        grid-template-columns: minmax(350px, 1fr) minmax(500px, 1fr);
+        gap: 40px;
+    }
+    
+    .hero-title {
+        font-size: 46px;
+    }
+    
+    .video-box {
+        width: clamp(160px, 28%, 220px);
+    }
+    
+    .video-slide {
+        gap: clamp(10px, 1.5vw, 18px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+
+    .hero-container {
+        padding: 50px 25px;
+    }
+
+    .hero-text {
+        max-width: 100%;
+    }
+
+    .hero-title {
+        font-size: 42px;
+    }
+
+    .hero-description {
+        font-size: 15px;
+    }
+    
+    .video-box {
+        width: clamp(180px, 30%, 240px);
+    }
+    
+    .video-slide {
+        gap: clamp(10px, 2vw, 20px);
+    }
+
+    .hero-brands {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .hero-brands-divider {
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0));
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: auto;
+    }
+
+    .hero-container {
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: 36px;
+    }
+
+    .hero-description {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 24px;
+    }
+
+    .video-box {
+        width: clamp(140px, 30%, 180px);
+    }
+    
+    .video-slide {
+        gap: clamp(8px, 1.5vw, 14px);
+    }
+
+    .hero-brands {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-container {
+        padding: 30px 15px;
+    }
+
+    .hero-title {
+        font-size: 30px;
+    }
+
+    .hero-badge {
+        font-size: 12px;
+        padding: 6px 16px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .video-box {
+        width: clamp(120px, 30%, 150px);
+    }
+    
+    .video-slide {
+        gap: clamp(6px, 1vw, 10px);
+    }
+
+    .hero-brands {
+        margin-top: 40px;
+        gap: 12px;
+    }
+
+    .hero-brands-title {
+        font-size: 20px;
+    }
+
+    .brands-row {
+        gap: 12px;
+    }
+
+    .brand-item {
+        width: 90px;
+        height: 48px;
+        padding: 6px;
+    }
+}

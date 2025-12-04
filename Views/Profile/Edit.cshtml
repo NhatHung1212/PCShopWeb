@@ -1,0 +1,63 @@
+@model ShopWeb.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="profile-section">
+    <div class="profile-container">
+        <div class="edit-profile-card">
+            <div class="edit-header">
+                <h1 class="edit-title">Edit Profile</h1>
+                <p class="edit-subtitle">Update your personal information</p>
+            </div>
+
+            <form asp-area="" asp-controller="Profile" asp-action="Edit" method="post" class="edit-form">
+                @Html.AntiForgeryToken()
+                
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert-error">
+                        <div asp-validation-summary="All"></div>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label for="fullName" class="form-label">Full Name <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="fullName" name="fullName" value="@Model.FullName" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-input" value="@Model.Email" disabled>
+                    <p class="form-note">Email cannot be changed</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-input" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber" placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-input" id="address" name="address" rows="4" placeholder="Enter your complete address">@Model.Address</textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-area="" asp-controller="Profile" asp-action="Index" class="btn-cancel-edit">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-save-profile">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

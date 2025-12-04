@@ -1,0 +1,225 @@
+@model ShopWeb.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="profile-section">
+    <div class="profile-container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert-success">
+                <i class="fas fa-check-circle"></i>
+                @TempData["Success"]
+            </div>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-header-info">
+                <h1 class="profile-name">@Model.FullName</h1>
+                <p class="profile-email">@Model.Email</p>
+            </div>
+            <a asp-area="" asp-controller="Profile" asp-action="Edit" class="btn-edit-profile">
+                <i class="fas fa-edit"></i>
+                Edit Profile
+            </a>
+        </div>
+
+        <div class="profile-layout">
+            <!-- Left Column: Info & Stats -->
+            <div class="profile-main">
+                <!-- Personal Information -->
+                <div class="profile-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Personal Information
+                    </h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Full Name</span>
+                            <span class="info-value">@Model.FullName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-value">@Model.Email</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone Number</span>
+                            <span class="info-value">@(Model.PhoneNumber ?? "Not provided")</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">@(Model.Address ?? "Not provided")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Statistics -->
+                <div class="profile-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Order Statistics
+                    </h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon total">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@ViewBag.TotalOrders</span>
+                                <span class="stat-label">Total Orders</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon money">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">$@ViewBag.TotalSpent.ToString("F2")</span>
+                                <span class="stat-label">Total Spent</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@ViewBag.PendingOrders</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon processing">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@ViewBag.ProcessingOrders</span>
+                                <span class="stat-label">Processing</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon delivered">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@ViewBag.DeliveredOrders</span>
+                                <span class="stat-label">Delivered</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cancelled">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@ViewBag.CancelledOrders</span>
+                                <span class="stat-label">Cancelled</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Quick Actions -->
+            <div class="profile-sidebar">
+                <div class="profile-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h2>
+                    <div class="quick-actions">
+                        <a asp-area="" asp-controller="Order" asp-action="MyOrders" class="action-btn">
+                            <i class="fas fa-list"></i>
+                            View My Orders
+                        </a>
+                        <a asp-area="" asp-controller="Cart" asp-action="Index" class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            View Shopping Cart
+                        </a>
+                        <a asp-area="" asp-controller="Profile" asp-action="Edit" class="action-btn">
+                            <i class="fas fa-user-edit"></i>
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Delete Account -->
+                <div class="profile-card danger-zone">
+                    <h2 class="card-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Danger Zone
+                    </h2>
+                    <p class="danger-text">
+                        Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <button type="button" class="btn-delete-account" onclick="showDeleteModal()">
+                        <i class="fas fa-trash-alt"></i>
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Delete Account</h2>
+            <button class="modal-close" onclick="hideDeleteModal()">&times;</button>
+        </div>
+        <form asp-area="" asp-controller="Profile" asp-action="DeleteAccount" method="post">
+            @Html.AntiForgeryToken()
+            <div class="modal-body">
+                <p class="modal-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone. All your data including orders will be permanently deleted.
+                </p>
+                <div class="form-group">
+                    <label for="password" class="form-label">Enter your password to confirm</label>
+                    <input type="password" class="form-input" id="password" name="password" required placeholder="Your password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="hideDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-confirm-delete">Delete My Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.getElementById('password').value = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                hideDeleteModal();
+            }
+        }
+    </script>
+}

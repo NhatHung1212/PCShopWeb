@@ -1,0 +1,173 @@
+@model ShopWeb.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-forms.css" />
+    <link rel="stylesheet" href="~/css/admin-tables.css" />
+}
+
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">Order Details <span style="font-family: 'Courier New', monospace;">#@Model.Id</span></h1>
+        <p class="admin-page-subtitle">View and manage order information</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="admin-btn admin-btn-sm" style="background: #404040; color: #fff;">
+        <i class="fas fa-arrow-left"></i>
+        Back to Orders
+    </a>
+</div>
+
+<div class="admin-grid">
+    <div class="admin-info-card">
+        <div class="admin-info-card-header">
+            <i class="fas fa-user"></i>
+            <h3 class="admin-info-card-title">Customer Information</h3>
+        </div>
+        <div class="admin-info-item">
+            <span class="admin-info-label">Name:</span>
+            <span class="admin-info-value">@Model.User?.FullName</span>
+        </div>
+        <div class="admin-info-item">
+            <span class="admin-info-label">Email:</span>
+            <span class="admin-info-value">@Model.User?.Email</span>
+        </div>
+        <div class="admin-info-item">
+            <span class="admin-info-label">Shipping Address:</span>
+            <span class="admin-info-value">@Model.ShippingAddress</span>
+        </div>
+    </div>
+
+    <div class="admin-info-card">
+        <div class="admin-info-card-header">
+            <i class="fas fa-info-circle"></i>
+            <h3 class="admin-info-card-title">Order Status</h3>
+        </div>
+        <div class="admin-info-item">
+            <span class="admin-info-label">Current Status:</span>
+            <span class="admin-info-value">
+                @if (Model.Status == "Pending")
+                {
+                    <span class="admin-status-badge admin-status-pending"><i class="fas fa-clock"></i> Pending</span>
+                }
+                else if (Model.Status == "Processing")
+                {
+                    <span class="admin-status-badge admin-status-processing"><i class="fas fa-cog fa-spin"></i> Processing</span>
+                }
+                else if (Model.Status == "Shipped")
+                {
+                    <span class="admin-status-badge admin-status-shipped"><i class="fas fa-shipping-fast"></i> Shipped</span>
+                }
+                else if (Model.Status == "Delivered")
+                {
+                    <span class="admin-status-badge admin-status-delivered"><i class="fas fa-check-circle"></i> Delivered</span>
+                }
+                else if (Model.Status == "Cancelled")
+                {
+                    <span class="admin-status-badge admin-status-cancelled"><i class="fas fa-times-circle"></i> Cancelled</span>
+                }
+            </span>
+        </div>
+        <div class="admin-info-item">
+            <span class="admin-info-label">Total Amount:</span>
+            <span class="admin-info-value">
+                <span class="admin-total-amount">@Model.TotalAmount.ToString("N0")đ</span>
+            </span>
+        </div>
+    </div>
+</div>
+
+@if (Model.CancelRequested)
+{
+    <div class="admin-alert-box admin-alert-warning">
+        <i class="fas fa-exclamation-triangle admin-alert-icon"></i>
+        <div class="admin-alert-content">
+            <h4 class="admin-alert-title">Cancellation Request</h4>
+            <p class="admin-alert-text"><strong>Reason:</strong> @Model.CancelReason</p>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <form asp-action="ApproveCancellation" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger" onclick="return confirm('Approve this cancellation request?')">
+                        <i class="fas fa-check-circle"></i> Approve Cancel
+                    </button>
+                </form>
+                <form asp-action="RejectCancellation" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="admin-btn admin-btn-sm" style="background: #606060; color: #fff;" onclick="return confirm('Reject this cancellation request?')">
+                        <i class="fas fa-times-circle"></i> Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="admin-form-container" style="margin-top: 24px;">
+    <form asp-action="UpdateStatus" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="admin-form-group">
+            <label for="status" class="admin-form-label">
+                <i class="fas fa-sync-alt"></i> Update Order Status
+            </label>
+            <select name="status" id="status" class="admin-form-select">
+                <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+                <option value="Processing" selected="@(Model.Status == "Processing")">Processing</option>
+                <option value="Shipped" selected="@(Model.Status == "Shipped")">Shipped</option>
+                <option value="Delivered" selected="@(Model.Status == "Delivered")">Delivered</option>
+                <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+            </select>
+        </div>
+        <button type="submit" class="admin-btn admin-btn-primary">
+            <i class="fas fa-save"></i>
+            Update Status
+        </button>
+    </form>
+</div>
+
+<div class="admin-form-header" style="margin-top: 40px;">
+    <h2 class="admin-form-title">Order Items</h2>
+</div>
+
+<div class="admin-table-container">
+    <table class="admin-detail-table">
+        <thead>
+            <tr>
+                <th><i class="fas fa-box"></i> Product</th>
+                <th><i class="fas fa-tag"></i> Price</th>
+                <th><i class="fas fa-sort-numeric-up"></i> Quantity</th>
+                <th><i class="fas fa-calculator"></i> Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model.OrderDetails)
+            {
+                <tr>
+                    <td><strong>@detail.Product?.Name</strong></td>
+                    <td><span style="color: #a0a0a0;">@detail.Price.ToString("N0")đ</span></td>
+                    <td>
+                        <span class="admin-items-count">
+                            <i class="fas fa-cube"></i>
+                            @detail.Quantity
+                        </span>
+                    </td>
+                    <td><span style="color: #4ade80; font-weight: 600;">@((detail.Price * detail.Quantity).ToString("N0"))đ</span></td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right; font-size: 18px;"><strong>Total:</strong></td>
+                <td>
+                    <span style="font-size: 24px; font-weight: 700; color: #4ade80;">
+                        @Model.TotalAmount.ToString("N0")đ
+                    </span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

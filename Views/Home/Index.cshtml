@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<!-- Hero Section with Video Background -->
+<section class="hero-section">
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline preload="auto" class="bg-video" id="heroVideo">
+            <source src="~/videos/background2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <div class="hero-container">
+        <div class="hero-content">
+            <!-- Left Side: Text Content -->
+            <div class="hero-text">
+                <div class="hero-badge">NH12 Store</div>
+                <h1 class="hero-title">
+                    PC GAMING & ĐỒ HỌA 
+                    <span class="gradient-text">GIÁ TỐT</span>
+                </h1>
+                <p class="hero-description">
+                    NH12 là đơn vị chuyên cung cấp <strong>giải pháp máy tính hiệu năng cao</strong>, được thiết kế và tối ưu hóa 
+                    theo từng nhu cầu sử dụng thực tế – từ gaming, thiết kế đồ họa, dựng phim, render 3D, kỹ thuật 
+                    CAD/CAM cho đến PC văn phòng và hệ thống doanh nghiệp.
+                </p>
+                <p class="hero-description">
+                    Chúng tôi không chỉ thuần bán phần cứng. NH12 đồng hành cùng khách hàng từ bước tư vấn, 
+                    chọn cấu hình, lắp đặt, kiểm thử hiệu năng cho đến bảo hành và hậu mãi lâu dài. Mỗi bộ máy tại 
+                    NH12 đều được xây dựng trên tinh thần <strong>"hiệu dụng như cầu – chọn đúng cấu hình – đấu tư dụng 
+                    mục tiêu"</strong>.
+                </p>
+                <div class="hero-buttons">
+                    <a asp-area="" asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                        <i class="fas fa-desktop"></i>
+                        Xem sản phẩm
+                    </a>
+                    <a href="#about" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Tìm hiểu thêm
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side: Video Carousel -->
+            <div class="hero-videos">
+                <div class="video-carousel" aria-label="Showcase videos" data-auto-delay="2600">
+                    <div class="video-slides-wrapper">
+                        <div class="video-slide" data-slide="0">
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-1.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-2.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-3.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="video-slide" data-slide="1">
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-4.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-5.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+
+                            <div class="video-box">
+                                <div class="video-wrapper">
+                                    <video autoplay muted loop playsinline class="highlight-video">
+                                        <source src="~/videos/pc-build-6.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-pagination">
+                    <button class="pagination-dot active" data-slide="0" aria-label="Slide 1"></button>
+                    <button class="pagination-dot" data-slide="1" aria-label="Slide 2"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Marquee -->
+        <div class="hero-brands" aria-label="Brands">
+            <h2 class="hero-brands-title">
+                BUILD PC VỚI LINH KIỆN <span class="gradient-text">THƯƠNG HIỆU TỐT NHẤT</span>
+            </h2>
+            <span class="hero-brands-divider" aria-hidden="true"></span>
+            <div class="brands-row">
+                <div class="brand-item"><img src="~/images/brand/brand2.png" alt="Brand 2"></div>
+                <div class="brand-item"><img src="~/images/brand/brand3.png" alt="Brand 3"></div>
+                <div class="brand-item"><img src="~/images/brand/brand4.png" alt="Brand 4"></div>
+                <div class="brand-item"><img src="~/images/brand/brand5.png" alt="Brand 5"></div>
+                <div class="brand-item"><img src="~/images/brand/brand6.png" alt="Brand 6"></div>
+                <div class="brand-item"><img src="~/images/brand/brand7.png" alt="Brand 7"></div>
+                <div class="brand-item"><img src="~/images/brand/brand8.png" alt="Brand 8"></div>
+                <div class="brand-item"><img src="~/images/brand/brand9.png" alt="Brand 9"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/brandlist.js" asp-append-version="true"></script>
+    <script src="~/js/home-carousel.js" asp-append-version="true"></script>
+    <script>
+        // Ensure hero video plays continuously
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroVideo = document.getElementById('heroVideo');
+            if (heroVideo) {
+                heroVideo.addEventListener('ended', function() {
+                    this.currentTime = 0;
+                    this.play();
+                });
+                
+                // Force play if paused
+                heroVideo.addEventListener('pause', function() {
+                    this.play();
+                });
+                
+                // Ensure video plays on load
+                heroVideo.play().catch(err => console.log('Video autoplay prevented:', err));
+            }
+        });
+    </script>
+}

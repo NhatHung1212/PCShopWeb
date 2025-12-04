@@ -1,0 +1,270 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@(ViewData["Title"] ?? "PC Shop")</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Site Icons (use same logo as header) -->
+    <link rel="icon" type="image/png" href="~/images/orther/logo2.png" asp-append-version="true" />
+    <link rel="shortcut icon" type="image/png" href="~/images/orther/logo2.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/images/orther/logo2.png" asp-append-version="true" />
+    <meta name="theme-color" content="#0a0509" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-wrapper">
+        <div class="header-container">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <a href="tel:0946703205" class="top-bar-item">
+                    <i class="fas fa-phone"></i>
+                    <span>Hotline: <span class="hotline-number">0946703205</span></span>
+                </a>
+                <a href="#" class="top-bar-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>Miễn phí vận chuyển cho đơn <span class="shipping-link">từ 500.000đ</span></span>
+                </a>
+            </div>
+
+            <!-- Main Header -->
+            <div class="main-header">
+                <!-- Logo -->
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="logo">
+                    <img src="~/images/orther/logo2.png" alt="PC Shop Logo" class="logo-img">
+                </a>
+
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <form id="neonSearchForm" asp-area="" asp-controller="Product" asp-action="Index" method="get" class="search-form">
+                        <div class="effect-layer outer-glow"></div>
+                        <div class="effect-layer dark-layer"></div>
+                        <div class="effect-layer bright-layer"></div>
+                        <div class="effect-layer primary-border"></div>
+                        <div class="pink-hint"></div>
+                        <input id="neonSearchInput"
+                               type="text" 
+                               name="searchTerm" 
+                               class="search-input" 
+                               placeholder="Tìm kiếm sản phẩm...">
+                        <div class="gradient-mask"></div>
+                        <button id="neonSearchBtn" type="submit" class="search-btn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" 
+                                      stroke="url(#paint0_linear)" 
+                                      stroke-width="2" 
+                                      stroke-linecap="round" 
+                                      stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="paint0_linear" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#a855f7"/>
+                                        <stop offset="1" stop-color="#ec4899"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </button>
+                        <div class="button-border-effect"></div>
+                    </form>
+                </div>
+
+                <!-- Header Right -->
+                <div class="header-right">
+                    <!-- Social Links -->
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/hung.buitran.3" class="social-link" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.instagram.com/_n.huw._.12" class="social-link" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/&#64;nh.hugg" class="social-link" title="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+
+                    <!-- Cart Button -->
+                    @{
+                        var cartCount = ViewBag.CartCount ?? 0;
+                    }
+                    <a asp-area="" asp-controller="Cart" asp-action="Index" class="cart-btn">
+                        <i class="fas fa-shopping-cart cart-icon"></i>
+                        <span>Giỏ hàng</span>
+                        @if (cartCount > 0)
+                        {
+                            <span class="cart-count">@cartCount</span>
+                        }
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main-nav">
+                <a asp-area="" asp-controller="Product" asp-action="Index" class="nav-link">
+                    <i class="fas fa-laptop"></i>
+                    <span>Sản phẩm</span>
+                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-area="" asp-controller="Order" asp-action="MyOrders" class="nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Đơn hàng</span>
+                    </a>
+                    <a asp-area="" asp-controller="Profile" asp-action="Index" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span>@User.Identity.Name</span>
+                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                            <i class="fas fa-cog"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                    }
+                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area="" asp-controller="Account" asp-action="Login" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Đăng nhập</span>
+                    </a>
+                    <a asp-area="" asp-controller="Account" asp-action="Register" class="nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Đăng ký</span>
+                    </a>
+                }
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        @if (TempData["Success"] != null)
+        {
+            <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+                <div style="background: #10b981; color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
+                    @TempData["Success"]
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+                <div style="background: #ef4444; color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
+                    @TempData["Error"]
+                </div>
+            </div>
+        }
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <!-- Footer Top -->
+            <div class="footer-top">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="~/images/orther/logo.svg" alt="PC Shop Logo" style="height: 50px;">
+                        <p style="margin-top: 15px; color: #a0a0a0; font-size: 14px; line-height: 1.6;">
+                            Cửa hàng PC uy tín chất lượng, cung cấp các sản phẩm máy tính, linh kiện chính hãng với giá tốt nhất.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Liên kết nhanh</h4>
+                    <ul>
+                        <li>
+                            <a asp-area="" asp-controller="Product" asp-action="Index" class="footer-link">
+                                <i class="fas fa-chevron-right"></i>
+                                <span>Sản phẩm</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Order" asp-action="MyOrders" class="footer-link">
+                                <i class="fas fa-chevron-right"></i>
+                                <span>Đơn hàng</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Cart" asp-action="Index" class="footer-link">
+                                <i class="fas fa-chevron-right"></i>
+                                <span>Giỏ hàng</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Liên hệ</h4>
+                    <ul>
+                        <li class="footer-contact-item">
+                            <i class="fas fa-phone" style="color: #a855f7;"></i>
+                            <a href="tel:0946703205" class="footer-contact-link">0946703205</a>
+                        </li>
+                        <li class="footer-contact-item">
+                            <i class="fas fa-envelope" style="color: #ec4899;"></i>
+                            <span>support&#64;pcshop.com</span>
+                        </li>
+                        <li class="footer-contact-item align-start">
+                            <i class="fas fa-map-marker-alt" style="color: #8b5cf6;"></i>
+                            <span>Thành phố Hồ Chí Minh</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 class="footer-title">Theo dõi chúng tôi</h4>
+                    <div class="footer-social-container">
+                        <a href="https://www.facebook.com/hung.buitran.3" target="_blank" class="footer-social-link facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.instagram.com/_n.huw._.12" target="_blank" class="footer-social-link instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/&#64;nh.hugg" target="_blank" class="footer-social-link tiktok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div style="text-align: center; padding: 25px 0; border-top: 1px solid #2a2a2a;">
+                    <p style="margin: 0; color: #707070; font-size: 14px;">
+                        &copy; @DateTime.Now.Year NH12 PC Shop. All rights reserved. | Designed and Developed 
+                        <i class="fas fa-heart" style="color: #ec4899; margin: 0 3px;"></i> 
+                        by huwgzxje
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/neon-search.js" asp-append-version="true"></script>
+    <script src="~/js/live-search.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

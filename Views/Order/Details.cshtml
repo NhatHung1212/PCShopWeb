@@ -1,0 +1,151 @@
+@model ShopWeb.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/orders.css" />
+}
+
+<div class="order-details-section">
+    <div class="orders-container">
+        <div class="order-details-header">
+            <div class="order-details-info">
+                <h1 class="order-details-title">Order <span>#@Model.Id</span></h1>
+                <div class="order-details-meta">
+                    <div class="order-meta-item">
+                        @{
+                            var statusClass = Model.Status.ToLower();
+                        }
+                        <span class="status-badge @statusClass">@Model.Status</span>
+                        @if (Model.CancelRequested)
+                        {
+                            <span class="status-badge pending">Cancel Pending</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-details-layout">
+            <div class="order-details-main">
+                <!-- Order Items -->
+                <div class="order-section-card">
+                    <h2 class="order-section-title">
+                        <i class="fas fa-box"></i>
+                        Order Items
+                    </h2>
+                    <div class="order-items">
+                        @foreach (var detail in Model.OrderDetails)
+                        {
+                            var imagePath = !string.IsNullOrEmpty(detail.Product?.ImageUrl) 
+                                ? (detail.Product.ImageUrl.StartsWith("images/") ? detail.Product.ImageUrl : $"images/{detail.Product.ImageUrl}")
+                                : "images/placeholder.png";
+                            
+                            <div class="order-item">
+                                <div class="order-item-image">
+                                    <img src="~/@imagePath" alt="@detail.Product?.Name" />
+                                </div>
+                                <div class="order-item-details">
+                                    <div class="order-item-name">@detail.Product?.Name</div>
+                                    <div class="order-item-qty">Quantity: @detail.Quantity</div>
+                                </div>
+                                <div class="order-item-price">@((detail.Price * detail.Quantity).ToString("N0"))đ</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Shipping Info -->
+                <div class="order-section-card">
+                    <h2 class="order-section-title">
+                        <i class="fas fa-shipping-fast"></i>
+                        Shipping Information
+                    </h2>
+                    <div class="shipping-info">
+                        <div class="shipping-row">
+                            <span class="shipping-label">Address:</span>
+                            <span class="shipping-value">@Model.ShippingAddress</span>
+                        </div>
+                    </div>
+                </div>
+
+                @if ((Model.Status == "Pending" || Model.Status == "Processing") && !Model.CancelRequested && Model.Status != "Cancelled")
+                {
+                    <div class="order-section-card" style="border-color: #ef4444;">
+                        <h2 class="order-section-title" style="color: #ef4444;">
+                            <i class="fas fa-times-circle"></i>
+                            Request Cancellation
+                        </h2>
+                        <form asp-area="" asp-action="RequestCancel" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <div class="form-group">
+                                <label class="form-label">Reason for cancellation <span class="required">*</span></label>
+                                <textarea class="form-input" id="cancelReason" name="cancelReason" rows="4" required placeholder="Please provide a reason for cancellation..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-cancel-order" style="width: 100%; margin-top: 15px; padding: 14px;" onclick="return confirm('Are you sure you want to request order cancellation?')">
+                                <i class="fas fa-ban"></i> Request Cancellation
+                            </button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.CancelRequested && !string.IsNullOrEmpty(Model.CancelReason))
+                {
+                    <div class="order-section-card" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.05);">
+                        <h2 class="order-section-title" style="color: #f59e0b;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Cancel Request Details
+                        </h2>
+                        <div class="shipping-info">
+                            <div class="shipping-row">
+                                <span class="shipping-label">Reason:</span>
+                                <span class="shipping-value">@Model.CancelReason</span>
+                            </div>
+                            <div class="shipping-row">
+                                <span class="shipping-label">Status:</span>
+                                <span class="shipping-value" style="color: #f59e0b;">Pending Admin Approval</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="order-details-sidebar">
+                <!-- Order Summary -->
+                <div class="order-summary-card">
+                    <h2 class="order-section-title">
+                        <i class="fas fa-receipt"></i>
+                        Order Summary
+                    </h2>
+                    <div class="summary-row">
+                        <span class="summary-label">Subtotal</span>
+                        <span class="summary-value">@(((decimal)ViewBag.Subtotal).ToString("N0"))đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Shipping</span>
+                        <span class="summary-value">@(((decimal)ViewBag.Shipping) == 0m ? "Miễn phí" : ((decimal)ViewBag.Shipping).ToString("N0") + "đ")</span>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <span class="summary-label">Total</span>
+                        <span class="summary-value">@(((decimal)ViewBag.Total).ToString("N0"))đ</span>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 25px;">
+                        <a asp-area="" asp-controller="Order" asp-action="MyOrders" class="btn-view-order" style="padding: 14px; justify-content: center; text-decoration: none;">
+                            <i class="fas fa-list"></i>
+                            View All Orders
+                        </a>
+                        
+                        <a asp-area="" asp-controller="Product" asp-action="Index" class="btn-cancel-order" style="padding: 14px; justify-content: center; color: #fff; border-color: #a855f7; text-decoration: none;">
+                            <i class="fas fa-shopping-bag"></i>
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

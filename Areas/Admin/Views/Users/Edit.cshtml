@@ -1,0 +1,120 @@
+@using ShopWeb.Areas.Admin.Controllers
+@model EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-forms.css" />
+}
+
+<div class="admin-page-header" style="background: linear-gradient(135deg, #1a0a2e 0%, #0f051d 100%); padding: 32px; border-radius: 16px; margin-bottom: 32px; border: 1px solid #2a1a4e;">
+    <div>
+        <h1 class="admin-page-title" style="font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">
+            <i class="fas fa-user-edit"></i> Edit User
+        </h1>
+        <p class="admin-page-subtitle" style="font-size: 16px; color: #a0a0a0;">Update user information and roles</p>
+    </div>
+    <a asp-action="Index" class="admin-btn" style="background: linear-gradient(135deg, #404040 0%, #2a2a2a 100%); color: #fff; padding: 12px 24px; border-radius: 10px; border: 1px solid #505050; font-weight: 500; transition: all 0.3s;">
+        <i class="fas fa-arrow-left"></i> Back to Users
+    </a>
+</div>
+
+<div class="admin-form-container">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        
+        <!-- Creative 2-Column Layout -->
+        <div class="admin-grid-2" style="gap: 24px;">
+            <!-- Left Card: User Information -->
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%); border: 1px solid #2a2a3e; border-radius: 16px; padding: 28px; box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #2a2a3e;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0;">User Information</h3>
+                </div>
+                
+                <div class="admin-form-group" style="margin-bottom: 24px;">
+                    <label asp-for="Email" class="admin-form-label" style="font-size: 14px; font-weight: 600; color: #c0c0c0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-envelope" style="color: #3b82f6;"></i> Email Address
+                    </label>
+                    <input asp-for="Email" class="admin-form-input" readonly style="background: #0a0a0a; border: 2px solid #2a2a3e; border-radius: 10px; padding: 14px 16px; color: #808080; font-size: 15px; cursor: not-allowed;" />
+                    <small class="admin-form-help" style="color: #707070; font-size: 13px; margin-top: 6px; display: block;"><i class="fas fa-lock"></i> Email cannot be changed</small>
+                </div>
+
+                <div class="admin-form-group" style="margin-bottom: 24px;">
+                    <label asp-for="FullName" class="admin-form-label" style="font-size: 14px; font-weight: 600; color: #c0c0c0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-id-card" style="color: #10b981;"></i> Full Name
+                    </label>
+                    <input asp-for="FullName" class="admin-form-input" placeholder="Enter full name" style="background: #0a0a0a; border: 2px solid #2a2a3e; border-radius: 10px; padding: 14px 16px; color: #fff; font-size: 15px; transition: all 0.3s;" />
+                </div>
+                
+                <div class="admin-form-group">
+                    <label asp-for="Address" class="admin-form-label" style="font-size: 14px; font-weight: 600; color: #c0c0c0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-map-marker-alt" style="color: #ef4444;"></i> Address
+                    </label>
+                    <input asp-for="Address" class="admin-form-input" placeholder="Enter address" style="background: #0a0a0a; border: 2px solid #2a2a3e; border-radius: 10px; padding: 14px 16px; color: #fff; font-size: 15px; transition: all 0.3s;" />
+                </div>
+            </div>
+            
+            <!-- Right Card: User Roles -->
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%); border: 1px solid #2a2a3e; border-radius: 16px; padding: 28px; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #2a2a3e;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0;">Roles & Permissions</h3>
+                </div>
+                
+                <div class="admin-form-group" style="margin-bottom: 24px;">
+                    @foreach (var role in Model.AllRoles)
+                    {
+                        <div style="background: #0a0a0a; border: 2px solid #2a2a3e; border-radius: 10px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='#2a2a3e'">
+                            <input class="admin-form-check-input" type="checkbox" name="SelectedRoles" value="@role" 
+                                   id="role_@role" @(Model.CurrentRoles.Contains(role) ? "checked" : "") style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer; accent-color: #8b5cf6;" />
+                            <label class="admin-form-check-label" for="role_@role" style="cursor: pointer; font-size: 15px; font-weight: 500; color: #fff; display: inline-flex; align-items: center; gap: 8px;">
+                                @if (role == "Admin")
+                                {
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px;">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 8px;">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                }
+                                @role
+                            </label>
+                        </div>
+                    }
+                    <small class="admin-form-help" style="color: #707070; font-size: 13px; margin-top: 8px; display: block;">Select one or more roles for this user</small>
+                </div>
+                
+                <!-- Info Box -->
+                <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%); border: 1px solid #3b82f6; border-radius: 10px; padding: 16px; display: flex; gap: 12px;">
+                    <i class="fas fa-info-circle" style="color: #3b82f6; font-size: 20px; margin-top: 2px;"></i>
+                    <div>
+                        <strong style="color: #fff; font-size: 14px; display: block; margin-bottom: 6px;">Role Information</strong>
+                        <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 0;">Users must have at least one role. Administrators have full system access.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-form-actions" style="margin-top: 32px; display: flex; gap: 16px; align-items: center;">
+            <button type="submit" class="admin-btn" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; font-size: 17px; font-weight: 600; padding: 16px 40px; border-radius: 12px; border: none; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); transition: all 0.3s; cursor: pointer;">
+                <i class="fas fa-save"></i>
+                Save Changes
+            </button>
+            <a asp-action="Index" class="admin-btn" style="background: #2a2a2a; color: #fff; font-size: 16px; font-weight: 500; padding: 14px 32px; border-radius: 12px; border: 1px solid #404040; transition: all 0.3s;">
+                <i class="fas fa-arrow-left"></i>
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

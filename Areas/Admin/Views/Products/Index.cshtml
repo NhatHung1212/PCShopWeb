@@ -1,0 +1,123 @@
+@model IEnumerable<ShopWeb.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-tables.css" />
+}
+
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">Products Management</h1>
+        <p class="admin-page-subtitle">Manage all products in your store</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="admin-btn admin-btn-create">
+        <i class="fas fa-plus-circle"></i>
+        Create New Product
+    </a>
+</div>
+
+@if (Model.Any())
+{
+    <div class="admin-table-container">
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> ID</th>
+                        <th><i class="fas fa-box"></i> Product Name</th>
+                        <th><i class="fas fa-image"></i> Image</th>
+                        <th><i class="fas fa-receipt"></i> Cost Price</th>
+                        <th><i class="fas fa-dollar-sign"></i> Sell Price</th>
+                        <th><i class="fas fa-chart-line"></i> Profit</th>
+                        <th><i class="fas fa-warehouse"></i> Stock</th>
+                        <th><i class="fas fa-tags"></i> Category</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        var imagePath = !string.IsNullOrEmpty(product.ImageUrl) 
+                            ? (product.ImageUrl.StartsWith("images/") ? product.ImageUrl : $"images/{product.ImageUrl}")
+                            : "images/placeholder.png";
+                        
+                        <tr>
+                            <td><strong>#@product.Id</strong></td>
+                            <td>
+                                <strong>@product.Name</strong>
+                            </td>
+                            <td>
+                                <img src="~/@imagePath" alt="@product.Name" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #2a2a2a;" />
+                            </td>
+                            <td>
+                                <span style="color: #f59e0b; font-weight: 600;">@product.CostPrice.ToString("N0")đ</span>
+                            </td>
+                            <td>
+                                <span class="admin-price">@product.Price.ToString("N0")đ</span>
+                            </td>
+                            <td>
+                                @{
+                                    var profit = product.Price - product.CostPrice;
+                                    var profitPercent = product.CostPrice > 0 ? ((profit / product.CostPrice) * 100) : 0;
+                                    var profitColor = profit > 0 ? "#10b981" : (profit < 0 ? "#ef4444" : "#a0a0a0");
+                                }
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="color: @profitColor; font-weight: 700;">@profit.ToString("N0")đ</span>
+                                    <small style="color: #a0a0a0; font-size: 11px;">(@profitPercent.ToString("F1")%)</small>
+                                </div>
+                            </td>
+                            <td>
+                                @{
+                                    var stockColor = product.Stock >= 10 ? "#10b981" : (product.Stock > 0 ? "#f59e0b" : "#ef4444");
+                                    var stockIcon = product.Stock >= 10 ? "fa-check-circle" : (product.Stock > 0 ? "fa-exclamation-triangle" : "fa-times-circle");
+                                }
+                                <span style="display: inline-flex; align-items: center; gap: 6px; color: @stockColor; font-weight: 600;">
+                                    <i class="fas @stockIcon"></i>
+                                    @product.Stock
+                                </span>
+                            </td>
+                            <td>
+                                @if (product.Category != null)
+                                {
+                                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); border-radius: 20px; font-size: 13px; font-weight: 500;">
+                                        <i class="@product.Category.IconClass"></i>
+                                        @product.Category.Name
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: #606060; font-size: 13px;">Uncategorized</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a asp-action="Edit" asp-route-id="@product.Id" class="admin-btn admin-btn-sm admin-btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@product.Id" method="post" class="admin-delete-form" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="admin-btn admin-btn-sm admin-btn-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="admin-empty-state">
+        <i class="fas fa-box-open"></i>
+        <p>No products found. Create your first product to get started.</p>
+    </div>
+}

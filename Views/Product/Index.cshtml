@@ -1,0 +1,209 @@
+@model IEnumerable<ShopWeb.Models.Product>
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var categories = ViewBag.Categories as List<ShopWeb.Models.Category>;
+    var selectedCategoryId = ViewBag.SelectedCategoryId as long?;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/products.css" asp-append-version="true" />
+    <style>
+        .category-filter-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            border: 2px solid #2a2a3e;
+        }
+
+        .category-filter-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-filter-title i {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .category-filter-btn {
+            padding: 12px 24px;
+            background: #1a1a1a;
+            border: 2px solid #2a2a3e;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .category-filter-btn:hover {
+            transform: translateY(-2px);
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            color: #fff;
+        }
+
+        .category-filter-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            border-color: #10b981;
+            color: #fff;
+        }
+    </style>
+}
+
+<!-- Products Header -->
+<div class="products-header">
+    <div class="container">
+        <h1 class="page-title">Sản phẩm của chúng tôi</h1>
+        <p class="page-subtitle">Khám phá bộ sưu tập PC Gaming & Đồ họa chất lượng cao</p>
+    </div>
+</div>
+
+<!-- Category Filter & Sort -->
+@if (categories != null && categories.Any())
+{
+    <div class="category-filter-section">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h2 class="category-filter-title">
+                        <i class="fas fa-filter"></i>
+                        Lọc theo danh mục
+                    </h2>
+                    <div class="category-buttons">
+                        <a href="@Url.Action("Index", "Product", new { area = "" })" 
+                           class="category-filter-btn @(selectedCategoryId == null ? "active" : "")">
+                            <i class="fas fa-th"></i>
+                            Tất cả sản phẩm
+                        </a>
+                        @foreach (var category in categories)
+                        {
+                            <a href="@Url.Action("Index", "Product", new { area = "", categoryId = category.Id })" 
+                               class="category-filter-btn @(selectedCategoryId == category.Id ? "active" : "")">
+                                <i class="@category.IconClass"></i>
+                                @category.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+                
+                <div class="filter-group" style="min-width: 200px;">
+                    <label class="filter-label" style="color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 10px; display: block;">
+                        <i class="fas fa-sort"></i> Sắp xếp:
+                    </label>
+                    <select class="filter-select" id="sortSelect" style="width: 100%; padding: 12px 16px; background: #1a1a1a; border: 2px solid #2a2a3e; border-radius: 10px; color: #fff; font-size: 15px; cursor: pointer;">
+                        <option value="newest">Mới nhất</option>
+                        <option value="price-asc">Giá: Thấp đến Cao</option>
+                        <option value="price-desc">Giá: Cao đến Thấp</option>
+                        <option value="name">Tên A-Z</option>
+                    </select>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+            {
+                <div class="search-result-info" style="margin-top: 20px; padding: 12px 20px; background: #1a1a1a; border-radius: 10px; border: 2px solid #2a2a3e; display: flex; align-items: center; gap: 12px; color: #fff;">
+                    <i class="fas fa-search" style="color: #3b82f6;"></i>
+                    <span>Kết quả tìm kiếm cho: "<strong>@ViewBag.SearchTerm</strong>"</span>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" class="clear-search" style="margin-left: auto; padding: 6px 12px; background: #ef4444; border-radius: 6px; color: #fff; text-decoration: none; transition: all 0.3s;">
+                        <i class="fas fa-times"></i> Xóa
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Products Grid -->
+<section class="products-section">
+    @if (Model.Any())
+    {
+        <div class="products-grid" id="productsGrid">
+            @foreach (var product in Model)
+            {
+                var imagePath = !string.IsNullOrEmpty(product.ImageUrl) 
+                    ? (product.ImageUrl.StartsWith("images/") ? product.ImageUrl : $"images/{product.ImageUrl}")
+                    : "images/placeholder.png";
+                
+                <div class="product-card" data-name="@product.Name.ToLower()" data-price="@product.Price">
+                    <a asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" style="text-decoration: none; color: inherit;">
+                        <div class="product-image-wrapper">
+                            <img src="~/@imagePath" alt="@product.Name" class="product-image" />
+                            <span class="product-badge">Mới</span>
+                            <div class="product-overlay">
+                                <button class="quick-view-btn" onclick="event.preventDefault(); window.location.href='@Url.Action("Details", "Product", new { area = "", id = product.Id })'">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="product-info">
+                            <h3 class="product-name">@product.Name</h3>
+                            <p class="product-description">@(product.Description ?? "Sản phẩm chất lượng cao")</p>
+                            
+                            <div class="product-footer">
+                                <span class="product-price">@product.Price.ToString("N0")đ</span>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <form asp-area="" asp-controller="Cart" asp-action="AddToCart" method="post" style="display: inline;" onclick="event.stopPropagation();">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@product.Id" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <i class="fas fa-cart-plus"></i>
+                                            <span>Thêm</span>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-area="" asp-controller="Account" asp-action="Login" class="add-to-cart-btn" onclick="event.stopPropagation();">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                        <span>Đăng nhập</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-products">
+            <i class="fas fa-box-open"></i>
+            <h3>Không tìm thấy sản phẩm</h3>
+            <p>Hiện tại chưa có sản phẩm nào trong danh mục này</p>
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                Về trang chủ
+            </a>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/sticky-filters.js" asp-append-version="true"></script>
+    <script src="~/js/products.js" asp-append-version="true"></script>
+}

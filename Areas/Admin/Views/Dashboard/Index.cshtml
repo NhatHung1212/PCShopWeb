@@ -1,0 +1,571 @@
+@using ShopWeb.Services
+@{
+    ViewData["Title"] = "Dashboard";
+    var recentOrders = ViewBag.RecentOrders as List<ShopWeb.Models.Order>;
+    var topProductsSales = ViewBag.TopProducts as List<ProductSalesDto>;
+    var orderStatusDistribution = ViewBag.OrderStatusDistribution as Dictionary<string, int>;
+    var revenueByMonth = ViewBag.RevenueByMonth as List<RevenueByMonthDto>;
+    var productsByCategory = ViewBag.ProductsByCategory as Dictionary<string, int>;
+    var inventoryStatus = ViewBag.InventoryStatus as Dictionary<string, int>;
+    var ordersByMonth = ViewBag.OrdersByMonth as List<OrdersByMonthDto>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 2px solid #2a2a3e;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .chart-card h3 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-card h3 i {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        @@media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="dashboard-section">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Dashboard</h1>
+        <p class="dashboard-subtitle">Welcome back! Here's what's happening with your store</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card primary">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@ViewBag.TotalCustomers</span>
+                <span class="stat-label">Total Users</span>
+            </div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@ViewBag.TotalProducts</span>
+                <span class="stat-label">Total Products</span>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@ViewBag.TotalOrders</span>
+                <span class="stat-label">Total Orders</span>
+            </div>
+        </div>
+
+        <div class="stat-card revenue">
+            <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@ViewBag.TotalRevenue.ToString("N0")đ</span>
+                <span class="stat-label">Total Revenue</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-chart-line"></i>
+                Revenue Trend (Last 6 Months)
+            </h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-chart-pie"></i>
+                Order Status Distribution
+            </h3>
+            <canvas id="orderStatusChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-tags"></i>
+                Products by Category
+            </h3>
+            <canvas id="categoryChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-fire"></i>
+                Top Selling Products
+            </h3>
+            <canvas id="topProductsChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-box-open"></i>
+                Inventory Status
+            </h3>
+            <canvas id="inventoryChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>
+                <i class="fas fa-calendar-alt"></i>
+                Orders by Month
+            </h3>
+            <canvas id="ordersMonthChart"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Orders Status -->
+        <div class="dashboard-card">
+            <h2 class="card-title">
+                <i class="fas fa-chart-pie"></i>
+                Orders Status
+            </h2>
+            <div class="status-grid">
+                <div class="status-item pending">
+                    <div class="status-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-value">@ViewBag.PendingOrders</span>
+                        <span class="status-label">Pending</span>
+                    </div>
+                </div>
+                <div class="status-item processing">
+                    <div class="status-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-value">@ViewBag.ProcessingOrders</span>
+                        <span class="status-label">Processing</span>
+                    </div>
+                </div>
+                <div class="status-item shipped">
+                    <div class="status-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-value">@ViewBag.ShippedOrders</span>
+                        <span class="status-label">Shipped</span>
+                    </div>
+                </div>
+                <div class="status-item delivered">
+                    <div class="status-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-value">@ViewBag.DeliveredOrders</span>
+                        <span class="status-label">Delivered</span>
+                    </div>
+                </div>
+                <div class="status-item cancelled">
+                    <div class="status-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-value">@ViewBag.CancelledOrders</span>
+                        <span class="status-label">Cancelled</span>
+                    </div>
+                </div>
+                @if (ViewBag.CancelRequests > 0)
+                {
+                    <div class="status-item alert">
+                        <div class="status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="status-info">
+                            <span class="status-value">@ViewBag.CancelRequests</span>
+                            <span class="status-label">Cancel Requests</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+            <h2 class="card-title">
+                <i class="fas fa-bolt"></i>
+                Quick Actions
+            </h2>
+            <div class="quick-actions">
+                <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="action-btn">
+                    <i class="fas fa-plus-circle"></i>
+                    Add New Product
+                </a>
+                <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="action-btn">
+                    <i class="fas fa-list"></i>
+                    Manage Orders
+                </a>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="action-btn">
+                    <i class="fas fa-users-cog"></i>
+                    Manage Users
+                </a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="action-btn">
+                    <i class="fas fa-boxes"></i>
+                    View All Products
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="dashboard-card full-width">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-receipt"></i>
+                Recent Orders
+            </h2>
+            <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="view-all-link">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        @if (recentOrders != null && recentOrders.Any())
+        {
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in recentOrders)
+                        {
+                            <tr>
+                                <td><strong>#@order.Id</strong></td>
+                                <td>@order.User?.FullName</td>
+                                <td>@order.OrderDetails.Count item(s)</td>
+                                <td><strong>@order.TotalAmount.ToString("N0")đ</strong></td>
+                                <td>
+                                    @{
+                                        var statusClass = order.Status.ToLower();
+                                    }
+                                    <span class="badge @statusClass">@order.Status</span>
+                                    @if (order.CancelRequested)
+                                    {
+                                        <span class="badge alert">Cancel Req.</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn-view">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No orders yet</p>
+            </div>
+        }
+    </div>
+
+    <!-- Top Products -->
+    <div class="dashboard-card full-width">
+        <h2 class="card-title">
+            <i class="fas fa-star"></i>
+            Top Selling Products
+        </h2>
+        
+        @if (topProductsSales != null && topProductsSales.Any())
+        {
+            <div class="products-list">
+                @foreach (var product in topProductsSales)
+                {
+                    var imagePath = !string.IsNullOrEmpty(product.ImageUrl) 
+                        ? (product.ImageUrl.StartsWith("images/") ? product.ImageUrl : $"images/{product.ImageUrl}")
+                        : "images/placeholder.png";
+                    
+                    <div class="product-item">
+                        <div class="product-image">
+                            <img src="~/@imagePath" alt="@product.ProductName" />
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-name">@product.ProductName</h3>
+                            <p class="product-stats">
+                                <span><i class="fas fa-shopping-cart"></i> @product.TotalQuantity sold</span>
+                                <span><i class="fas fa-dollar-sign"></i> @product.TotalRevenue.ToString("N0")đ revenue</span>
+                            </p>
+                        </div>
+                        <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@product.ProductId" class="btn-edit-product">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <p>No sales data available</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Revenue Trend Chart
+        const revenueData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(revenueByMonth ?? new List<RevenueByMonthDto>()));
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: {
+                labels: revenueData.map(r => r.Month),
+                datasets: [{
+                    label: 'Revenue (đ)',
+                    data: revenueData.map(r => r.Revenue),
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    },
+                    x: {
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    }
+                }
+            }
+        });
+
+        // Order Status Distribution Chart
+        const orderStatusData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(orderStatusDistribution ?? new Dictionary<string, int>()));
+        const statusLabels = Object.keys(orderStatusData);
+        const statusValues = Object.values(orderStatusData);
+        new Chart(document.getElementById('orderStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusValues,
+                    backgroundColor: [
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: '#1a1a1a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#fff', padding: 15 }
+                    }
+                }
+            }
+        });
+
+        // Products by Category Chart
+        const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(productsByCategory ?? new Dictionary<string, int>()));
+        const categoryLabels = Object.keys(categoryData);
+        const categoryValues = Object.values(categoryData);
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: 'Products',
+                    data: categoryValues,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0a0', stepSize: 1 },
+                        grid: { color: '#2a2a3e' }
+                    },
+                    x: {
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    }
+                }
+            }
+        });
+
+        // Top Products Chart
+        const topProductsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(topProductsSales ?? new List<ProductSalesDto>()));
+        new Chart(document.getElementById('topProductsChart'), {
+            type: 'bar',
+            data: {
+                labels: topProductsData.map(p => p.ProductName),
+                datasets: [{
+                    label: 'Units Sold',
+                    data: topProductsData.map(p => p.TotalQuantity),
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    },
+                    y: {
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    }
+                }
+            }
+        });
+
+        // Inventory Status Chart
+        const inventoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(inventoryStatus ?? new Dictionary<string, int>()));
+        const inventoryLabels = Object.keys(inventoryData);
+        const inventoryValues = Object.values(inventoryData);
+        new Chart(document.getElementById('inventoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: inventoryLabels,
+                datasets: [{
+                    data: inventoryValues,
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: '#1a1a1a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#fff', padding: 15 }
+                    }
+                }
+            }
+        });
+
+        // Orders by Month Chart
+        const ordersMonthData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ordersByMonth ?? new List<OrdersByMonthDto>()));
+        new Chart(document.getElementById('ordersMonthChart'), {
+            type: 'bar',
+            data: {
+                labels: ordersMonthData.map(o => o.Month),
+                datasets: [{
+                    label: 'Orders',
+                    data: ordersMonthData.map(o => o.OrderCount),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    },
+                    x: {
+                        ticks: { color: '#a0a0a0' },
+                        grid: { color: '#2a2a3e' }
+                    }
+                }
+            }
+        });
+    </script>
+}
+

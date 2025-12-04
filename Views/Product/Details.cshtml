@@ -1,0 +1,596 @@
+@model ShopWeb.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+    var imagePath = !string.IsNullOrEmpty(Model.ImageUrl) 
+        ? (Model.ImageUrl.StartsWith("images/") ? Model.ImageUrl : $"images/{Model.ImageUrl}")
+        : "images/placeholder.png";
+    var averageRating = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+    var reviewCount = Model.Reviews.Count;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-detail.css" asp-append-version="true" />
+    <style>
+        .reviews-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #2a2a3e;
+            margin-top: 40px;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2a2a3e;
+        }
+
+        .reviews-header h2 {
+            font-size: 28px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .write-review-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .write-review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .review-form {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 32px;
+            border: 2px solid #2a2a3e;
+        }
+
+        .review-form h3 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .rating-input {
+            margin-bottom: 20px;
+        }
+
+        .rating-input label {
+            display: block;
+            color: #d0d0d0;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 32px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            cursor: pointer;
+            color: #3a3a3a;
+            transition: all 0.2s ease;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #fbbf24;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #d0d0d0;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            background: #0a0a0a;
+            border: 2px solid #2a2a3e;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .submit-review-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .review-item {
+            background: #1a1a1a;
+            padding: 24px;
+            border-radius: 15px;
+            border: 2px solid #2a2a3e;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .reviewer-details h4 {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .review-date {
+            color: #808080;
+            font-size: 13px;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 4px;
+            font-size: 16px;
+        }
+
+        .star-filled {
+            color: #fbbf24;
+        }
+
+        .star-empty {
+            color: #3a3a3a;
+        }
+
+        .review-comment {
+            color: #d0d0d0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            color: #808080;
+        }
+
+        .no-reviews i {
+            font-size: 48px;
+            color: #3a3a3a;
+            margin-bottom: 16px;
+        }
+    </style>
+}
+
+<!-- Product Detail Header -->
+<div class="product-detail-header">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-home"></i> Trang chủ
+            </a>
+            <span>/</span>
+            <a asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
+            <span>/</span>
+            <span class="current">@Model.Name</span>
+        </nav>
+    </div>
+</div>
+
+<!-- Product Detail Section -->
+<section class="product-detail-section">
+    <div class="product-detail-container">
+        <div class="product-detail-grid">
+            <!-- Product Images -->
+            <div class="product-images">
+                <div class="main-image-wrapper" id="mainImageWrapper">
+                    <img src="~/@imagePath" alt="@Model.Name" class="main-image" id="mainImage" />
+                    <div class="zoom-badge">
+                        <i class="fas fa-search-plus"></i>
+                        Hover để phóng to
+                    </div>
+                </div>
+                
+                <div class="thumbnails">
+                    <div class="thumbnail active">
+                        <img src="~/@imagePath" alt="@Model.Name" />
+                    </div>
+                    <div class="thumbnail">
+                        <img src="~/@imagePath" alt="@Model.Name" />
+                    </div>
+                    <div class="thumbnail">
+                        <img src="~/@imagePath" alt="@Model.Name" />
+                    </div>
+                    <div class="thumbnail">
+                        <img src="~/@imagePath" alt="@Model.Name" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="product-details">
+                <span class="product-detail-badge">Sản phẩm mới</span>
+                
+                <h1 class="product-detail-title">@Model.Name</h1>
+                
+                <div class="product-rating">
+                    <div class="stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= averageRating)
+                            {
+                                <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-star" style="color: #3a3a3a;"></i>
+                            }
+                        }
+                    </div>
+                    <span class="rating-text">(@averageRating.ToString("F1")/5 - @reviewCount đánh giá)</span>
+                </div>
+                
+                <div class="product-detail-price">@Model.Price.ToString("N0")đ</div>
+                
+                <div class="product-detail-description">
+                    <p>@(Model.Description ?? "Sản phẩm PC Gaming & Đồ họa cao cấp với hiệu năng vượt trội. Được thiết kế và tối ưu hóa để mang lại trải nghiệm tốt nhất cho game thủ và người làm đồ họa chuyên nghiệp.")</p>
+                </div>
+                
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form asp-area="" asp-controller="Cart" asp-action="AddToCart" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        
+                        <div class="product-actions">
+                            <div class="quantity-selector">
+                                <span class="quantity-label">Số lượng:</span>
+                                <div class="quantity-controls">
+                                    <button type="button" class="quantity-btn" id="decreaseQty">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" name="quantity" id="quantityInput" class="quantity-input" value="1" min="1" max="99" readonly />
+                                    <button type="button" class="quantity-btn" id="increaseQty">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-add-to-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Thêm vào giỏ hàng</span>
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="product-actions">
+                        <a asp-area="" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn-add-to-cart" style="text-decoration: none; width: 100%;">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Đăng nhập để mua hàng</span>
+                        </a>
+                    </div>
+                }
+                
+                <!-- Product Specs -->
+                <div class="product-specs">
+                    <h3 class="specs-title">
+                        <i class="fas fa-info-circle"></i>
+                        Thông số kỹ thuật
+                    </h3>
+                    <div class="spec-item">
+                        <span class="spec-label">Mã sản phẩm:</span>
+                        <span class="spec-value">PC-@Model.Id.ToString().PadLeft(6, '0')</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Tình trạng:</span>
+                        <span class="spec-value">Còn hàng</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Bảo hành:</span>
+                        <span class="spec-value">24 tháng chính hãng</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Xuất xứ:</span>
+                        <span class="spec-value">Chính hãng phân phối tại Việt Nam</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Giao hàng:</span>
+                        <span class="spec-value">Miễn phí toàn quốc (đơn từ 500.000đ)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews Section -->
+<div class="container">
+    <div class="reviews-section">
+        <div class="reviews-header">
+            <h2>
+                <i class="fas fa-star" style="color: #fbbf24;"></i>
+                Đánh giá của khách hàng
+            </h2>
+            @if (User.Identity!.IsAuthenticated)
+            {
+                var userHasReviewedHeader = Model.Reviews.Any(r => r.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                if (!userHasReviewedHeader)
+                {
+                    <button class="write-review-btn" onclick="toggleReviewForm()">
+                        <i class="fas fa-pen"></i> Viết đánh giá
+                    </button>
+                }
+            }
+        </div>
+
+        @if (User.Identity!.IsAuthenticated)
+        {
+            var userHasReviewed = Model.Reviews.Any(r => r.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+            
+            @if (!userHasReviewed)
+            {
+                <div class="review-form" id="reviewForm" style="display: none;">
+                    <h3>Chia sẻ trải nghiệm của bạn</h3>
+                    <form asp-area="" asp-controller="Reviews" asp-action="Create" method="post" id="createReviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        
+                        <div class="rating-input">
+                            <label>Đánh giá của bạn</label>
+                            <div class="star-rating">
+                                <input type="radio" name="rating" value="5" id="star5" required />
+                                <label for="star5"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="4" id="star4" />
+                                <label for="star4"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="3" id="star3" />
+                                <label for="star3"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="2" id="star2" />
+                                <label for="star2"><i class="fas fa-star"></i></label>
+                                <input type="radio" name="rating" value="1" id="star1" />
+                                <label for="star1"><i class="fas fa-star"></i></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nhận xét của bạn</label>
+                            <textarea name="comment" id="reviewComment" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-review-btn">
+                            <i class="fas fa-paper-plane"></i> Gửi đánh giá
+                        </button>
+                    </form>
+                </div>
+            }
+            
+            <!-- Edit Review Form (Hidden) -->
+            <div class="review-form" id="editReviewForm" style="display: none;">
+                <h3>Chỉnh sửa đánh giá của bạn</h3>
+                <form asp-area="" asp-controller="Reviews" asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="editReviewId" />
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    
+                    <div class="rating-input">
+                        <label>Đánh giá của bạn</label>
+                        <div class="star-rating">
+                            <input type="radio" name="rating" value="5" id="editStar5" required />
+                            <label for="editStar5"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" value="4" id="editStar4" />
+                            <label for="editStar4"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" value="3" id="editStar3" />
+                            <label for="editStar3"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" value="2" id="editStar2" />
+                            <label for="editStar2"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" value="1" id="editStar1" />
+                            <label for="editStar1"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nhận xét của bạn</label>
+                        <textarea name="comment" id="editReviewComment" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." required></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button type="submit" class="submit-review-btn">
+                            <i class="fas fa-save"></i> Lưu thay đổi
+                        </button>
+                        <button type="button" onclick="cancelEdit()" class="submit-review-btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+
+        @if (Model.Reviews.Any())
+        {
+            <div class="reviews-list">
+                @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+                {
+                    var isOwnReview = User.Identity!.IsAuthenticated && review.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    
+                    <div class="review-item" id="review-@review.Id">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    @(review.User?.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div class="reviewer-details">
+                                    <h4>@(review.User?.FullName ?? "Khách hàng")</h4>
+                                    <span class="review-date">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="review-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="fas fa-star star-filled"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-star star-empty"></i>
+                                        }
+                                    }
+                                </div>
+                                @if (isOwnReview)
+                                {
+                                    <div style="display: flex; gap: 8px;">
+                                        <button 
+                                            class="btn-edit-review"
+                                            data-review-id="@review.Id"
+                                            data-rating="@review.Rating"
+                                            data-comment="@review.Comment"
+                                            onclick="handleEditReviewClick(event)"
+                                            style="padding: 6px 12px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px;">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                                                                <form asp-area="" asp-controller="Reviews" asp-action="Delete" method="post" style="display: inline;" 
+                                              onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?')">
+                                                                                        @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@review.Id" />
+                                            <input type="hidden" name="productId" value="@Model.Id" />
+                                            <button type="submit" 
+                                                    style="padding: 6px 12px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px;">
+                                                <i class="fas fa-trash"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <p class="review-comment">@review.Comment</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-reviews">
+                <i class="fas fa-comments"></i>
+                <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/product-detail.js" asp-append-version="true"></script>
+    <script>
+        function toggleReviewForm() {
+            const form = document.getElementById('reviewForm');
+            const editForm = document.getElementById('editReviewForm');
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
+            if (editForm) {
+                editForm.style.display = 'none';
+            }
+        }
+
+        function editReview(reviewId, rating, comment) {
+            const createForm = document.getElementById('reviewForm');
+            const editForm = document.getElementById('editReviewForm');
+            
+            if (createForm) createForm.style.display = 'none';
+            editForm.style.display = 'block';
+            
+            document.getElementById('editReviewId').value = reviewId;
+            document.getElementById('editStar' + rating).checked = true;
+            // Decode safely any HTML entities from data-comment
+            const commentField = document.getElementById('editReviewComment');
+            commentField.value = comment;
+            
+            // Scroll to form
+            editForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function handleEditReviewClick(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            const reviewId = btn.getAttribute('data-review-id');
+            const rating = btn.getAttribute('data-rating');
+            const comment = btn.getAttribute('data-comment');
+            editReview(reviewId, rating, comment);
+        }
+
+        function cancelEdit() {
+            document.getElementById('editReviewForm').style.display = 'none';
+        }
+    </script>
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap & Site CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="admin-layout">
+    <header class="admin-header">
+        <nav class="admin-navbar">
+            <div class="admin-nav-container">
+                <a class="admin-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Admin Panel</span>
+                </a>
+                
+                <button class="admin-toggle" type="button" onclick="toggleAdminMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="admin-nav-content" id="adminNavMenu">
+                    <ul class="admin-nav-links">
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" asp-area="Admin" asp-controller="Products" asp-action="Index">
+                                <i class="fas fa-box"></i>
+                                <span>Products</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                                <i class="fas fa-tags"></i>
+                                <span>Categories</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Orders</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">
+                                <i class="fas fa-users"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="admin-nav-actions">
+                        <li class="admin-nav-item">
+                            <a class="admin-nav-link" href="/" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>View Site</span>
+                            </a>
+                        </li>
+                        <li class="admin-nav-item">
+                            <span class="admin-user">
+                                <i class="fas fa-user-shield"></i>
+                                <span>@User.Identity?.Name</span>
+                            </span>
+                        </li>
+                        <li class="admin-nav-item">
+                            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="admin-logout-form">
+                                <button type="submit" class="admin-nav-link admin-logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="admin-container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="admin-alert admin-alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span>@TempData["Success"]</span>
+                <button type="button" class="admin-alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="admin-alert admin-alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>@TempData["Error"]</span>
+                <button type="button" class="admin-alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+        
+        <main class="admin-main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="admin-footer">
+        <div class="admin-footer-container">
+            <p>&copy; 2025 PcShop Admin Panel. All rights reserved.</p>
+            <p>Powered by ASP.NET Core</p>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        function toggleAdminMenu() {
+            const menu = document.getElementById('adminNavMenu');
+            menu.classList.toggle('active');
+        }
+        
+        // Close menu when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('adminNavMenu');
+            const toggle = document.querySelector('.admin-toggle');
+            
+            if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
