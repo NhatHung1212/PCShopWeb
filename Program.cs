@@ -78,43 +78,37 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
     
-    try
+    logger.LogInformation("=== DATABASE SETUP START ===");
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    
+    // Check pending migrations
+    var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+    logger.LogInformation($"Pending migrations: {pendingMigrations.Count}");
+    
+    if (pendingMigrations.Any())
     {
-        logger.LogInformation("Checking database connection...");
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        
-        // Try to apply migrations, but don't fail if tables already exist
-        var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-        if (pendingMigrations.Any())
+        foreach (var migration in pendingMigrations)
         {
-            logger.LogInformation($"Found {pendingMigrations.Count} pending migrations. Attempting to apply...");
-            try
-            {
-                context.Database.Migrate();
-                logger.LogInformation("Database migration completed successfully.");
-            }
-            catch (MySqlConnector.MySqlException ex) when (ex.ErrorCode == MySqlConnector.MySqlErrorCode.TableAccessDenied || ex.ErrorCode == MySqlConnector.MySqlErrorCode.DuplicateKeyName)
-            {
-                logger.LogWarning(ex, "Migration skipped - tables may already exist from previous setup.");
-            }
-        }
-        else
-        {
-            logger.LogInformation("No pending migrations. Database is up to date.");
+            logger.LogInformation($"  - {migration}");
         }
         
-        // Seed data if needed
-        logger.LogInformation("Starting data seeding...");
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
-        logger.LogInformation("Data seeding completed successfully.");
+        logger.LogInformation("Applying migrations...");
+        context.Database.Migrate();
+        logger.LogInformation("✓ Migrations applied successfully!");
     }
-    catch (Exception ex)
+    else
     {
-        logger.LogError(ex, "ERROR during database setup: {Message}", ex.Message);
-        // Don't throw - let app start anyway so we can debug
+        logger.LogInformation("✓ Database is up to date.");
     }
+    
+    // Seed data
+    logger.LogInformation("Seeding data...");
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    DbSeeder.SeedAsync(context, userManager, roleManager).GetAwaiter().GetResult();
+    logger.LogInformation("✓ Data seeding completed!");
+    
+    logger.LogInformation("=== DATABASE SETUP COMPLETE ===");
 }
 
 // ===========================
