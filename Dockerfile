@@ -1,6 +1,6 @@
-## Multi-stage Dockerfile for ASP.NET Core
+## Multi-stage Dockerfile for ASP.NET Core (net10.0)
 ## Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy project files
@@ -17,7 +17,7 @@ COPY . ./
 RUN dotnet publish -c Release -o /app/out --no-restore
 
 ## Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
 # Copy published output
