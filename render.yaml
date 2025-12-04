@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: pcshopweb
+    env: docker
+    region: singapore
+    plan: free
+    autoDeploy: true
+    buildCommand: dotnet publish -c Release -o out
+    startCommand: cd out && dotnet ShopWeb.dll
+    healthCheckPath: /check-db
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: PORT
+        value: "10000"
+      - key: DatabaseProvider
+        value: MySql
+      - key: ConnectionStrings__DefaultConnection
+        sync: false  # set in Render Dashboard with your Aiven MySQL connection string
