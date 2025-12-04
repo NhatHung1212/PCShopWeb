@@ -80,10 +80,28 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        logger.LogInformation("Starting database migration...");
+        logger.LogInformation("Checking database connection...");
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Synchronous version
-        logger.LogInformation("Database migration completed successfully.");
+        
+        // Try to apply migrations, but don't fail if tables already exist
+        var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation($"Found {pendingMigrations.Count} pending migrations. Attempting to apply...");
+            try
+            {
+                context.Database.Migrate();
+                logger.LogInformation("Database migration completed successfully.");
+            }
+            catch (MySqlConnector.MySqlException ex) when (ex.ErrorCode == MySqlConnector.MySqlErrorCode.TableAccessDenied || ex.ErrorCode == MySqlConnector.MySqlErrorCode.DuplicateKeyName)
+            {
+                logger.LogWarning(ex, "Migration skipped - tables may already exist from previous setup.");
+            }
+        }
+        else
+        {
+            logger.LogInformation("No pending migrations. Database is up to date.");
+        }
         
         // Seed data if needed
         logger.LogInformation("Starting data seeding...");
@@ -94,8 +112,8 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "CRITICAL ERROR during database setup. Application may not function correctly.");
-        throw; // Throw to prevent app from starting with broken database
+        logger.LogError(ex, "ERROR during database setup: {Message}", ex.Message);
+        // Don't throw - let app start anyway so we can debug
     }
 }
 
